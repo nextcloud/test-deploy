@@ -23,7 +23,7 @@
 		<docker-install>
 			<registry>ghcr.io</registry>
 			<image>cloud-py-api/test-deploy</image>
-			<image-tag>release</image-tag>
+			<image-tag>latest</image-tag>
 		</docker-install>
 		<scopes>
 		</scopes>

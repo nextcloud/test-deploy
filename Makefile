@@ -28,11 +28,10 @@ build-push-latest:
 
 .PHONY: run
 run:
-	docker exec master-stable28-1 sudo -u www-data php occ app_api:app:unregister test-deploy --silent --force || true
-	docker exec master-stable28-1 sudo -u www-data php occ app_api:app:register test-deploy --force-scopes \
-		--info-xml https://raw.githubusercontent.com/cloud-py-api/test-deploy/main/appinfo/info.xml
-
-.PHONY: run-debug
-run-debug:
 	docker exec master-stable28-1 sudo -u www-data php occ app_api:app:register test-deploy --force-scopes --test-deploy-mode \
 		--info-xml https://raw.githubusercontent.com/cloud-py-api/test-deploy/main/appinfo/info.xml
+
+.PHONY: run-latest
+run-debug:
+	docker exec master-stable28-1 sudo -u www-data php occ app_api:app:register test-deploy --force-scopes --test-deploy-mode \
+		--info-xml https://raw.githubusercontent.com/cloud-py-api/test-deploy/main/appinfo/info-latest.xml
