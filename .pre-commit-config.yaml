@@ -26,17 +26,3 @@ repos:
     rev: v0.3.7
     hooks:
     -   id: ruff
-
--   repo: local
-    hooks:
-    -   id: pylint
-        name: pylint
-        entry: pylint "lib/"
-        language: system
-        types: [ python ]
-        pass_filenames: false
-        args:
-            [
-                "-rn", # Only display messages
-                "-sn", # Don't display the score
-            ]

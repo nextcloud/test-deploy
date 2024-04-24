@@ -9,17 +9,19 @@ ADD j[s] /app/js
 ADD l10[n] /app/l10n
 ADD li[b] /app/lib
 
+COPY --chmod=775 healthcheck.sh /
+
 # Installing PyTorch based on BUILD_TYPE
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "aarch64" ]; then \
         echo "Installing PyTorch for ARM64"; \
-        pip install torch torchvision torchaudio; \
+        python3 -m pip install torch torchvision torchaudio; \
     elif [ "$BUILD_TYPE" = "rocm" ]; then \
-        pip install --pre torch torchvision torchaudio --find-links https://download.pytorch.org/whl/nightly/rocm6.0; \
+        python3 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0; \
     elif [ "$BUILD_TYPE" = "cpu" ]; then \
-        pip install torch torchvision torchaudio --find-links https://download.pytorch.org/whl/cpu; \
+        python3 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu; \
     else \
-        pip install torch torchvision torchaudio; \
+        python3 -m pip install torch torchvision torchaudio; \
     fi
 
 RUN \
