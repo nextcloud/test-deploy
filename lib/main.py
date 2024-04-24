@@ -1,35 +1,82 @@
-"""Simplest example."""
+"""Modified basic example for testing problems with deployment"""
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, responses, BackgroundTasks
 from nc_py_api import NextcloudApp
-from nc_py_api.ex_app import AppAPIAuthMiddleware, LogLvl, run_app, set_handlers
+from nc_py_api.ex_app import AppAPIAuthMiddleware, run_app, set_handlers, get_computation_device
+import torch
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    set_handlers(app, enabled_handler)
+    set_handlers(app, enabled_handler, default_heartbeat=False, default_init=False)
     yield
 
 
 APP = FastAPI(lifespan=lifespan)
-APP.add_middleware(AppAPIAuthMiddleware)  # set global AppAPI authentication middleware
+APP.add_middleware(AppAPIAuthMiddleware)
 
 
-def enabled_handler(enabled: bool, nc: NextcloudApp) -> str:
-    # This will be called each time application is `enabled` or `disabled`
-    # NOTE: `user` is unavailable on this step, so all NC API calls that require it will fail as unauthorized.
-    print(f"enabled={enabled}")
-    if enabled:
-        nc.log(LogLvl.WARNING, f"Hello from {nc.app_cfg.app_name} :)")
+@APP.get("/heartbeat")
+async def heartbeat_callback():
+    print(f"Heartbeat was called")
+    return responses.JSONResponse(content={"status": "ok"})
+
+
+def report_init_status() -> None:
+    nc = NextcloudApp()
+    print(f"Try default url to report the init status: {nc.app_cfg.endpoint}")
+    try:
+        nc.set_init_status(100)
+        print("Connect to Nextcloud was successful")
+        return
+    except Exception as e:
+        print(e)
+    print()
+    print("ERROR occurred! Can't report the ExApp status to the Nextcloud instance.")
+
+
+@APP.post("/init")
+async def init_callback(b_tasks: BackgroundTasks):
+    print("Init was called")
+    b_tasks.add_task(report_init_status)
+    return responses.JSONResponse(content={})
+
+
+def enabled_handler(enabled: bool, _nc: NextcloudApp) -> str:
+    print(f"enabled_handler: enabled={str(bool(enabled))}")
+    r = ""
+    if get_computation_device() == "CUDA":
+        print("Get CUDA information")
+        print("is available:", torch.cuda.is_available())
+        if torch.cuda.is_available():
+            print("device count:", torch.cuda.device_count())
+            if torch.cuda.device_count():
+                print("current device index:", torch.cuda.current_device())
+                print("device name:", torch.cuda.get_device_name(torch.cuda.current_device()))
+            else:
+                r = "Error: Device count is zero"
+        else:
+            r = "Error: CUDA is not available"
+    elif get_computation_device() == "ROCM":
+        print("Get ROCM information")
+        print("is available:", torch.cuda.is_available())
+        if torch.cuda.is_available():
+            print("device count:", torch.cuda.device_count())
+            if torch.cuda.device_count():
+                print("current device index:", torch.cuda.current_device())
+                print("device name:", torch.cuda.get_device_name(torch.cuda.current_device()))
+            else:
+                r = "Error: Device count is zero"
+        else:
+            print("TO-DO")
+            r = ""
     else:
-        nc.log(LogLvl.WARNING, f"Bye bye from {nc.app_cfg.app_name} :(")
-    # In case of an error, a non-empty short string should be returned, which will be shown to the NC administrator.
-    return ""
+        print("Running on CPU")
+    print(r)
+    return r
 
 
 if __name__ == "__main__":
-    # Wrapper around `uvicorn.run`.
-    # You are free to call it directly, with just using the `APP_HOST` and `APP_PORT` variables from the environment.
     run_app("main:APP", log_level="trace")
