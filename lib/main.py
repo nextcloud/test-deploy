@@ -69,27 +69,34 @@ def enabled_handler(enabled: bool, _nc: NextcloudApp) -> str:
         print("Get CUDA information", flush=True)
         print("is available:", torch.cuda.is_available(), flush=True)
         if torch.cuda.is_available():
-            print("device count:", torch.cuda.device_count(), flush=True)
-            if torch.cuda.device_count():
-                print("current device index:", torch.cuda.current_device(), flush=True)
-                print("device name:", torch.cuda.get_device_name(torch.cuda.current_device()), flush=True)
+            print("torch version:", torch.version.cuda, flush=True)
+            if torch.version.cuda:
+                print("device count:", torch.cuda.device_count(), flush=True)
+                if torch.cuda.device_count():
+                    print("current device index:", torch.cuda.current_device(), flush=True)
+                    print("device name:", torch.cuda.get_device_name(torch.cuda.current_device()), flush=True)
+                else:
+                    r = "Error: Device count is zero"
             else:
-                r = "Error: Device count is zero"
+                r = "Error: torch is not build with CUDA support"
         else:
             r = "Error: CUDA is not available"
     elif get_computation_device() == "ROCM":
         print("Get ROCM information", flush=True)
         print("is available:", torch.cuda.is_available(), flush=True)
         if torch.cuda.is_available():
-            print("device count:", torch.cuda.device_count(), flush=True)
-            if torch.cuda.device_count():
-                print("current device index:", torch.cuda.current_device(), flush=True)
-                print("device name:", torch.cuda.get_device_name(torch.cuda.current_device()), flush=True)
+            print("torch version:", torch.version.hip, flush=True)
+            if torch.version.hip:
+                print("device count:", torch.cuda.device_count(), flush=True)
+                if torch.cuda.device_count():
+                    print("current device index:", torch.cuda.current_device(), flush=True)
+                    print("device name:", torch.cuda.get_device_name(torch.cuda.current_device()), flush=True)
+                else:
+                    r = "Error: Device count is zero"
             else:
-                r = "Error: Device count is zero"
+                r = "Error: torch is not build with HIP support"
         else:
-            print("TO-DO", flush=True)
-            r = ""
+            r = "Error: ROCM is not available"
     else:
         print("Running on CPU", flush=True)
     print(r)
