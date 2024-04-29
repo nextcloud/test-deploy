@@ -46,7 +46,9 @@ def report_init_status() -> None:
         nextcloud_url = nextcloud_url.replace("https:", "http:")
         print(f"Try send request using HTTP instead of HTTPS: {nextcloud_url}", flush=True)
         try:
-            r = httpx.get(nextcloud_url.rstrip("/") + "/ocs/v1.php/cloud/capabilities")
+            r = httpx.get(
+                nextcloud_url.rstrip("/") + "/ocs/v1.php/cloud/capabilities", headers={"OCS-APIRequest": "true"}
+            )
             if httpx.codes.is_error(r.status_code):
                 print("Unsuccessful. Can not determine correct URL of the Nextcloud instance.", flush=True)
             else:
