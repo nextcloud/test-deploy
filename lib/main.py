@@ -52,7 +52,10 @@ def report_init_status() -> None:
             if httpx.codes.is_error(r.status_code):
                 print("Unsuccessful. Can not determine correct URL of the Nextcloud instance.", flush=True)
             else:
-                print("Success. Maybe HTTP should be used? Check you infrastructure configuration.", flush=True)
+                print(
+                    "[IMPORTANT] Success. Maybe HTTP should be used? Check your infrastructure configuration.",
+                    flush=True,
+                )
         except Exception:  # noqa
             print("Unsuccessful. Can not determine correct URL of the Nextcloud instance.", flush=True)
 
