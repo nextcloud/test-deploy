@@ -17,7 +17,7 @@ RUN ARCH=$(uname -m) && \
         echo "Installing PyTorch for ARM64"; \
         python3 -m pip install torch torchvision torchaudio; \
     elif [ "$BUILD_TYPE" = "rocm" ]; then \
-        python3 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0; \
+        python3 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.1; \
     elif [ "$BUILD_TYPE" = "cpu" ]; then \
         python3 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu; \
     else \
