@@ -49,6 +49,6 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           file: Dockerfile
-          tags: ghcr.io/${{ github.repository }}:${{ env.VERSION }}
+          tags: ghcr.io/${{ github.repository }}-cpu:${{ env.VERSION }}
           build-args: |
             BUILD_TYPE=cpu
