@@ -20,7 +20,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.PACKAGE_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
@@ -41,10 +41,11 @@ jobs:
       - name: Build container image
         uses: docker/build-push-action@v5
         with:
+          no-cache: true
           push: true
           context: .
           platforms: linux/amd64
           file: Dockerfile
-          tags: ghcr.io/${{ github.repository }}-cuda:${{ env.VERSION }}
+          tags: ghcr.io/${{ github.repository }}:${{ env.VERSION }}-cuda
           build-args: |
             BUILD_TYPE=cuda
