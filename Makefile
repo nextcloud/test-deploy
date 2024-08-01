@@ -15,16 +15,16 @@ help:
 .PHONY: build-push
 build-push:
 	docker login ghcr.io
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy-cpu:release --build-arg BUILD_TYPE=cpu .
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy-cuda:release --build-arg BUILD_TYPE=cuda .
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy-rocm:release --build-arg BUILD_TYPE=rocm .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:release-cpu --build-arg BUILD_TYPE=cpu .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:release-cuda --build-arg BUILD_TYPE=cuda .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:release-rocm --build-arg BUILD_TYPE=rocm .
 
 .PHONY: build-push-latest
 build-push-latest:
 	docker login ghcr.io
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy-cpu:latest --build-arg BUILD_TYPE=cpu .
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy-cuda:latest --build-arg BUILD_TYPE=cuda .
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy-rocm:latest --build-arg BUILD_TYPE=rocm .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:latest-cpu --build-arg BUILD_TYPE=cpu .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:latest-cuda --build-arg BUILD_TYPE=cuda .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:latest-rocm --build-arg BUILD_TYPE=rocm .
 
 .PHONY: run
 run:
