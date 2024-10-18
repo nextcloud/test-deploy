@@ -15,7 +15,7 @@ help:
 	@echo "  build-push-latest   builds app docker images with 'latest' tags and uploads them to ghcr.io"
 	@echo " "
 	@echo "  > Next commands are only for the dev environment with nextcloud-docker-dev!"
-	@echo "  > They should run from the host you are developing on and not in the container with Nextcloud!"
+	@echo "  > They must be run from the host you are developing on, not in a Nextcloud container!"
 	@echo " "
 	@echo "  run30               installs $(APP_NAME) for Nextcloud 30"
 	@echo "  run                 installs $(APP_NAME) for Nextcloud Latest"
