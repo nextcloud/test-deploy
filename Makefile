@@ -1,37 +1,58 @@
 .DEFAULT_GOAL := help
 
+APP_ID := test-deploy
+APP_NAME := TestDeploy
+APP_VERSION := $$(xmlstarlet sel -t -v "//version" appinfo/info.xml)
+
+
 .PHONY: help
 help:
-	@echo "Welcome to Test-Deploy app. Please use \`make <target>\` where <target> is one of"
+	@echo "  Welcome to $(APP_NAME) $(APP_VERSION)!"
 	@echo " "
-	@echo "  Next commands are only for dev environment with nextcloud-docker-dev!"
-	@echo "  "
-	@echo "  build-push        build and push release version of image"
-	@echo "  build-push-latest build and push dev version of image"
-	@echo "  "
-	@echo "  run               deploy release of 'Test-Deploy' for Nextcloud 28"
-	@echo "  run-debug         deploy dev version of 'Test-Deploy' for Nextcloud 28"
+	@echo "  Please use \`make <target>\` where <target> is one of"
+	@echo " "
+	@echo "  build-push          builds app docker image with 'release' tag and uploads it to ghcr.io"
+	@echo "  build-push-latest   builds app docker image with 'latest' tag and uploads it to ghcr.io"
+	@echo " "
+	@echo "  > Next commands are only for the dev environment with nextcloud-docker-dev!"
+	@echo "  > They should run from the host you are developing on and not in the container with Nextcloud!"
+	@echo " "
+	@echo "  run30               installs $(APP_NAME) for Nextcloud 30"
+	@echo "  run                 installs $(APP_NAME) for Nextcloud Latest"
+	@echo " "
+	@echo "  run30-latest        installs $(APP_NAME) with 'latest' tag for Nextcloud 30"
+	@echo "  run-latest          installs $(APP_NAME) with 'latest' tag for Nextcloud Latest"
 
 .PHONY: build-push
 build-push:
 	docker login ghcr.io
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:release-cpu --build-arg BUILD_TYPE=cpu .
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:release-cuda --build-arg BUILD_TYPE=cuda .
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:release-rocm --build-arg BUILD_TYPE=rocm .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):release-cpu --build-arg BUILD_TYPE=cpu .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):release-cuda --build-arg BUILD_TYPE=cuda .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):release-rocm --build-arg BUILD_TYPE=rocm .
 
 .PHONY: build-push-latest
 build-push-latest:
 	docker login ghcr.io
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:latest-cpu --build-arg BUILD_TYPE=cpu .
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:latest-cuda --build-arg BUILD_TYPE=cuda .
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/cloud-py-api/test-deploy:latest-rocm --build-arg BUILD_TYPE=rocm .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-cpu --build-arg BUILD_TYPE=cpu .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-cuda --build-arg BUILD_TYPE=cuda .
+	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-rocm --build-arg BUILD_TYPE=rocm .
+
+.PHONY: run30
+run30:
+	docker exec master-stable30-1 sudo -u www-data php occ app_api:app:register $(APP_ID) --test-deploy-mode \
+		--info-xml https://raw.githubusercontent.com/nextcloud/$(APP_ID)/main/appinfo/info.xml
 
 .PHONY: run
 run:
-	docker exec master-stable28-1 sudo -u www-data php occ app_api:app:register test-deploy --force-scopes --test-deploy-mode \
-		--info-xml https://raw.githubusercontent.com/cloud-py-api/test-deploy/main/appinfo/info.xml
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:app:register $(APP_ID) --test-deploy-mode \
+		--info-xml https://raw.githubusercontent.com/nextcloud/$(APP_ID)/main/appinfo/info.xml
+
+.PHONY: run30-latest
+run30-latest:
+	docker exec master-stable30-1 sudo -u www-data php occ app_api:app:register $(APP_ID) --test-deploy-mode \
+		--info-xml https://raw.githubusercontent.com/nextcloud/$(APP_ID)/main/appinfo/info-latest.xml
 
 .PHONY: run-latest
-run-debug:
-	docker exec master-stable28-1 sudo -u www-data php occ app_api:app:register test-deploy --force-scopes --test-deploy-mode \
-		--info-xml https://raw.githubusercontent.com/cloud-py-api/test-deploy/main/appinfo/info-latest.xml
+run-latest:
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:app:register $(APP_ID) --test-deploy-mode \
+		--info-xml https://raw.githubusercontent.com/nextcloud/$(APP_ID)/main/appinfo/info-latest.xml
