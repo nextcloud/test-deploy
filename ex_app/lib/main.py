@@ -51,7 +51,7 @@ def report_init_status() -> None:
                 headers={
                     "OCS-APIRequest": "true",
                     "User-Agent": f"ExApp/{nc.app_cfg.app_name}/{nc.app_cfg.app_version} (httpx/{httpx.__version__})",
-                }
+                },
             )
             if httpx.codes.is_error(r.status_code):
                 print("Unsuccessful. Can not determine correct URL of the Nextcloud instance.", flush=True)
