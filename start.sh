@@ -13,10 +13,14 @@ else
             cat <<EOF > /frpc.toml
 serverAddr = "$HP_FRP_ADDRESS"
 serverPort = $HP_FRP_PORT
-metadatas.token = "$HP_SHARED_KEY"
+
+transport.tls.enable = true
 transport.tls.certFile = "/certs/frp/client.crt"
 transport.tls.keyFile = "/certs/frp/client.key"
 transport.tls.trustedCaFile = "/certs/frp/ca.crt"
+transport.tls.serverName = "harp.nc"
+
+metadatas.token = "$HP_SHARED_KEY"
 
 [[proxies]]
 name = "$APP_ID"
@@ -30,6 +34,9 @@ EOF
             cat <<EOF > /frpc.toml
 serverAddr = "$HP_FRP_ADDRESS"
 serverPort = $HP_FRP_PORT
+
+transport.tls.enable = false
+
 metadatas.token = "$HP_SHARED_KEY"
 
 [[proxies]]
