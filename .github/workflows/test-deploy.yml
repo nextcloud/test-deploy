@@ -1,0 +1,134 @@
+# SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+name: Test Deploy
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-deploy-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  nc-host-app-docker:
+    runs-on: ubuntu-22.04
+    name: NC In Host
+
+    services:
+      postgres:
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        ports:
+          - 4444:5432/tcp
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_DB: nextcloud
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
+
+    steps:
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: master
+
+      - name: Checkout Test Deploy
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Set up php
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        with:
+          php-version: '8.3'
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
+          coverage: none
+          ini-file: development
+          ini-values:
+            apc.enabled=on, apc.enable_cli=on, disable_functions=
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
+            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
+          ./occ config:system:set loglevel --value=0 --type=integer
+          ./occ config:system:set debug --value=true --type=boolean
+          ./occ app:enable --force app_api
+
+      - name: Test deploy
+        run: |
+          PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:app:register ${{ env.APP_NAME }} docker_local_sock \
+            --info-xml apps/${{ env.APP_NAME }}/appinfo/info.xml
+          ./occ app_api:app:enable ${{ env.APP_NAME }}
+          ./occ app_api:app:disable ${{ env.APP_NAME }}
+
+      - name: Save container info & logs
+        if: always()
+        run: |
+          docker inspect nc_app_${{ env.APP_NAME }} | json_pp > container.json
+          docker logs nc_app_${{ env.APP_NAME }} > container.log 2>&1
+
+      - name: Check logs
+        run: |
+          grep -q 'Started' container.log || error
+          grep -q 'Connect to Nextcloud was successful' container.log || error
+          grep -q 'enabled_handler: enabled=True' container.log || error
+          grep -q 'enabled_handler: enabled=False' container.log || error
+          grep -q 'Running on CPU' container.log || error
+
+      - name: Unregister App & Daemon
+        run: |
+          ./occ app_api:app:unregister ${{ env.APP_NAME }}
+          ./occ app_api:daemon:unregister docker_local_sock
+
+      - name: Upload Container info
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nc_host_app_docker_container.json
+          path: container.json
+          if-no-files-found: warn
+
+      - name: Upload Container logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nc_host_app_docker_container.log
+          path: container.log
+          if-no-files-found: warn
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nc_host_app_docker_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn
+
+  tests-deploy-success:
+    permissions:
+      contents: none
+    runs-on: ubuntu-22.04
+    needs: [nc-host-app-docker]
+    name: Tests-Deploy-OK
+    steps:
+      - run: echo "Tests-Deploy passed successfully"
