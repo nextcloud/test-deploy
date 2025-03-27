@@ -26,16 +26,16 @@ help:
 .PHONY: build-push
 build-push:
 	docker login ghcr.io
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):release --build-arg BUILD_TYPE=cpu .
-	docker buildx build --push --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):release-cuda --build-arg BUILD_TYPE=cuda .
-	docker buildx build --push --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):release-rocm --build-arg BUILD_TYPE=rocm .
+	DOCKER_BUILDKIT=1 docker buildx build --progress=plain --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):release --build-arg BUILD_TYPE=cpu .
+	DOCKER_BUILDKIT=1 docker buildx build --progress=plain --push --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):release-cuda --build-arg BUILD_TYPE=cuda .
+	DOCKER_BUILDKIT=1 docker buildx build --progress=plain --push --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):release-rocm --build-arg BUILD_TYPE=rocm .
 
 .PHONY: build-push-latest
 build-push-latest:
 	docker login ghcr.io
-	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest --build-arg BUILD_TYPE=cpu .
-	docker buildx build --push --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-cuda --build-arg BUILD_TYPE=cuda .
-	docker buildx build --push --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-rocm --build-arg BUILD_TYPE=rocm .
+	DOCKER_BUILDKIT=1 docker buildx build --progress=plain --push --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest --build-arg BUILD_TYPE=cpu .
+	DOCKER_BUILDKIT=1 docker buildx build --progress=plain --push --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-cuda --build-arg BUILD_TYPE=cuda .
+	DOCKER_BUILDKIT=1 docker buildx build --progress=plain --push --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-rocm --build-arg BUILD_TYPE=rocm .
 
 .PHONY: run30
 run30:
