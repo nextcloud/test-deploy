@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm AS builder
+FROM docker.io/python:3.12-slim-bookworm AS builder
 
 RUN apt-get update && apt-get install -y curl && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -27,13 +27,13 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     ARCH=$(uname -m) && \
     if [ "$ARCH" = "aarch64" ]; then \
         echo "Installing PyTorch for ARM64"; \
-        python3 -m pip install --root-user-action=ignore torch==2.4.1 torchvision torchaudio; \
+        python3 -m pip install --root-user-action=ignore torch==2.8.0 torchvision; \
     elif [ "$BUILD_TYPE" = "rocm" ]; then \
-        python3 -m pip install --root-user-action=ignore torch==2.4.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.1; \
+        python3 -m pip install --root-user-action=ignore torch==2.8.0 torchvision --index-url https://download.pytorch.org/whl/rocm6.4; \
     elif [ "$BUILD_TYPE" = "cpu" ]; then \
-        python3 -m pip install --root-user-action=ignore torch==2.4.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu; \
+        python3 -m pip install --root-user-action=ignore torch==2.8.0 torchvision --index-url https://download.pytorch.org/whl/cpu; \
     else \
-        python3 -m pip install --root-user-action=ignore torch==2.4.1 torchvision torchaudio; \
+        python3 -m pip install --root-user-action=ignore torch==2.8.0 torchvision; \
     fi
 
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -46,11 +46,7 @@ COPY --from=builder /usr/local/ /usr/local/
 RUN apt-get update && apt-get install -y curl procps iputils-ping netcat-traditional && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ADD /ex_app/cs[s] /ex_app/css
-ADD /ex_app/im[g] /ex_app/img
-ADD /ex_app/j[s] /ex_app/js
-ADD /ex_app/l10[n] /ex_app/l10n
-ADD /ex_app/li[b] /ex_app/lib
+ADD /ex_app/lib /ex_app/lib
 
 COPY --chmod=775 healthcheck.sh /
 COPY --chmod=775 start.sh /

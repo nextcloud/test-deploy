@@ -73,6 +73,13 @@ async def init_callback(b_tasks: BackgroundTasks):
 
 def enabled_handler(enabled: bool, _nc: NextcloudApp) -> str:
     print(f"enabled_handler: enabled={bool(enabled)}", flush=True)
+    if torch.version.cuda is not None:
+        torch_version = f"{torch.__version__} (CUDA {torch.version.cuda})"
+    elif torch.version.hip is not None:
+        torch_version = f"{torch.__version__} (ROCm {torch.version.hip})"
+    else:
+        torch_version = torch.__version__
+    print(f"pytorch package version: {torch_version}", flush=True)
     r = ""
     if get_computation_device() == "CUDA":
         print("Get CUDA information", flush=True)
