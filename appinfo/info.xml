@@ -6,7 +6,7 @@
 	<description>
 	<![CDATA[Application to test the Docker AppAPI deployment process]]>
 	</description>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 	<licence>MIT</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
@@ -17,7 +17,7 @@
 	<bugs>https://github.com/nextcloud/app_api/issues</bugs>
 	<repository type="git">https://github.com/nextcloud/test-deploy</repository>
 	<dependencies>
-		<nextcloud min-version="30" max-version="33"/>
+		<nextcloud min-version="30" max-version="34"/>
 	</dependencies>
 	<external-app>
 		<docker-install>
