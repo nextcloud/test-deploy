@@ -39,7 +39,7 @@ build-push-latest:
 	DOCKER_BUILDKIT=1 docker buildx build --progress=plain --push --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-rocm --build-arg BUILD_TYPE=rocm .
 
 .PHONY: build-podman-latest
-build-push-latest:
+build-podman-latest:
 	podman build --format=docker --platform linux/arm64/v8,linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest --build-arg BUILD_TYPE=cpu .
 	podman build --format=docker --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-cuda --build-arg BUILD_TYPE=cuda .
 	podman build --format=docker --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-rocm --build-arg BUILD_TYPE=rocm .
