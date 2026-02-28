@@ -25,5 +25,19 @@
 			<image>nextcloud/test-deploy</image>
 			<image-tag>latest</image-tag>
 		</docker-install>
+		<k8s-service-roles>
+			<role>
+				<name>rp</name>
+				<display-name>Request Processing</display-name>
+				<env>APP_ROLE=rp</env>
+				<expose>true</expose>
+			</role>
+			<role>
+				<name>worker</name>
+				<display-name>Background Worker</display-name>
+				<env>APP_ROLE=worker</env>
+				<expose>false</expose>
+			</role>
+		</k8s-service-roles>
 	</external-app>
 </info>

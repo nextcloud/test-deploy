@@ -1,5 +1,8 @@
 """Modified basic example for testing problems with deployment"""
 
+import os
+import socket
+import time
 from contextlib import asynccontextmanager
 
 import httpx
@@ -12,6 +15,8 @@ from nc_py_api.ex_app import (
     run_app,
     set_handlers,
 )
+
+APP_ROLE = os.environ.get("APP_ROLE", "")
 
 
 @asynccontextmanager
@@ -119,6 +124,18 @@ def enabled_handler(enabled: bool, _nc: NextcloudApp) -> str:
     return r
 
 
+def run_worker() -> None:
+    """Entry point for the worker role (no HTTP server)."""
+    hostname = socket.gethostname()
+    print(f"[worker] Starting on {hostname}, APP_ROLE={APP_ROLE}", flush=True)
+    while True:
+        print(f"[worker] {hostname} is alive", flush=True)
+        time.sleep(300)
+
+
 if __name__ == "__main__":
     print("Started", flush=True)
-    run_app("main:APP", log_level="trace")
+    if APP_ROLE == "worker":
+        run_worker()
+    else:
+        run_app("main:APP", log_level="trace")
