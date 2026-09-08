@@ -18,10 +18,10 @@ help:
 	@echo "  > Next commands are only for the dev environment with nextcloud-docker-dev!"
 	@echo "  > They must be run from the host you are developing on, not in a Nextcloud container!"
 	@echo " "
-	@echo "  run31               installs $(APP_NAME) for Nextcloud 31"
+	@echo "  run33               installs $(APP_NAME) for Nextcloud 31"
 	@echo "  run                 installs $(APP_NAME) for Nextcloud Latest"
 	@echo " "
-	@echo "  run31-latest        installs $(APP_NAME) with 'latest' tag for Nextcloud 31"
+	@echo "  run33-latest        installs $(APP_NAME) with 'latest' tag for Nextcloud 31"
 	@echo "  run-latest          installs $(APP_NAME) with 'latest' tag for Nextcloud Latest"
 
 .PHONY: build-push
@@ -44,8 +44,8 @@ build-podman-latest:
 	podman build --format=docker --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-cuda --build-arg BUILD_TYPE=cuda .
 	podman build --format=docker --platform linux/amd64 --tag ghcr.io/nextcloud/$(APP_ID):latest-rocm --build-arg BUILD_TYPE=rocm .
 
-.PHONY: run31
-run31:
+.PHONY: run33
+run33:
 	docker exec master-stable31-1 sudo -u www-data php occ app_api:app:register $(APP_ID) --test-deploy-mode \
 		--info-xml https://raw.githubusercontent.com/nextcloud/$(APP_ID)/main/appinfo/info.xml
 
@@ -54,8 +54,8 @@ run:
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:app:register $(APP_ID) --test-deploy-mode \
 		--info-xml https://raw.githubusercontent.com/nextcloud/$(APP_ID)/main/appinfo/info.xml
 
-.PHONY: run31-latest
-run31-latest:
+.PHONY: run33-latest
+run33-latest:
 	docker exec master-stable31-1 sudo -u www-data php occ app_api:app:register $(APP_ID) --test-deploy-mode \
 		--info-xml https://raw.githubusercontent.com/nextcloud/$(APP_ID)/main/appinfo/info-latest.xml
 
