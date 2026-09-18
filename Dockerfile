@@ -1,4 +1,4 @@
-FROM docker.io/python:3.12-slim-bookworm AS builder
+FROM docker.io/python:3.14-slim-trixie AS builder
 
 RUN apt-get update && apt-get install -y curl && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -42,19 +42,19 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     ARCH=$(uname -m) && \
     if [ "$ARCH" = "aarch64" ]; then \
         echo "Installing PyTorch for ARM64"; \
-        python3 -m pip install --root-user-action=ignore torch==2.8.0 torchvision; \
+        python3 -m pip install --root-user-action=ignore torch==2.9.1 torchvision; \
     elif [ "$BUILD_TYPE" = "rocm" ]; then \
-        python3 -m pip install --root-user-action=ignore torch==2.8.0 torchvision --index-url https://download.pytorch.org/whl/rocm6.4; \
+        python3 -m pip install --root-user-action=ignore torch==2.9.1 torchvision --index-url https://download.pytorch.org/whl/rocm6.4; \
     elif [ "$BUILD_TYPE" = "cpu" ]; then \
-        python3 -m pip install --root-user-action=ignore torch==2.8.0 torchvision --index-url https://download.pytorch.org/whl/cpu; \
+        python3 -m pip install --root-user-action=ignore torch==2.9.1 torchvision --index-url https://download.pytorch.org/whl/cpu; \
     else \
-        python3 -m pip install --root-user-action=ignore torch==2.8.0 torchvision; \
+        python3 -m pip install --root-user-action=ignore torch==2.9.1 torchvision; \
     fi
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --root-user-action=ignore -r requirements.txt && rm requirements.txt
 
-FROM python:3.12-slim-bookworm
+FROM python:3.14-slim-trixie
 
 COPY --from=builder /usr/local/ /usr/local/
 
