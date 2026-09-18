@@ -43,6 +43,13 @@ jobs:
           repository: nextcloud/server
           ref: master
 
+      - name: Checkout AppAPI
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/app_api
+          repository: nextcloud/app_api
+          ref: main
+
       - name: Checkout Test Deploy
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
