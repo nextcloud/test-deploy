@@ -79,10 +79,18 @@ jobs:
           ./occ config:system:set debug --value=true --type=boolean
           ./occ app:enable --force app_api
 
+      - name: Build image
+        run: |
+          IMAGE="$(php -r '$d = simplexml_load_file($argv[1])->{"external-app"}->{"docker-install"}; echo $d->registry . "/" . $d->image . ":" . $d->{"image-tag"};' apps/${{ env.APP_NAME }}/appinfo/info.xml)"
+          echo "Building $IMAGE"
+          docker build --build-arg BUILD_TYPE=cpu -t "$IMAGE" apps/${{ env.APP_NAME }}
+
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
           ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
+          # Deploy the image built above instead of pulling the published one
+          ./occ app_api:daemon:registry:add docker_local_sock --registry-from ghcr.io --registry-to local
           ./occ app_api:app:register ${{ env.APP_NAME }} docker_local_sock \
             --info-xml apps/${{ env.APP_NAME }}/appinfo/info.xml
           ./occ app_api:app:enable ${{ env.APP_NAME }}
@@ -96,11 +104,10 @@ jobs:
 
       - name: Check logs
         run: |
-          grep -q 'Started' container.log || error
-          grep -q 'Connect to Nextcloud was successful' container.log || error
-          grep -q 'enabled_handler: enabled=True' container.log || error
-          grep -q 'enabled_handler: enabled=False' container.log || error
-          grep -q 'Running on CPU' container.log || error
+          for expected in 'Started' 'Connect to Nextcloud was successful' \
+            'enabled_handler: enabled=True' 'enabled_handler: enabled=False' 'Running on CPU'; do
+            grep -q "$expected" container.log || { echo "::error::Not found in the container log: $expected"; exit 1; }
+          done
 
       - name: Unregister App & Daemon
         run: |
